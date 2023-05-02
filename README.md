@@ -1,4 +1,4 @@
-# CNidAnalyLib
+# CAnalyLib
 
 ## Introduction
 
@@ -73,7 +73,7 @@ Generate: Randomly generate a specified number of legal ID number numbers accord
 
 ## Licence
 
-> ### CNidAnalyLib
+> ### ChinaIDAnalyLib
 >
 > #### A Python lib to annlyse China mainland resident identity card numbers
 >
