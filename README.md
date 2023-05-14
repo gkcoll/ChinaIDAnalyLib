@@ -4,6 +4,8 @@
 
 China Mainland (the Peoples Republic of China) resident identity card number analysis lib.
 
+> keyword: China,Mainland,resident,ID,identity,card,中国大陆,居民,身份证,分析
+
 ## Usage
 
 Out-of-the-box, you can run `GUI.exe` directly. If you want to use it in your own project, please see details in `demo.py`.
