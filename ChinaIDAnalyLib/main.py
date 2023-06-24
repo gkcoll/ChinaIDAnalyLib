@@ -92,7 +92,6 @@ class CNID:
         y = int(self.id[6:10])
         m = int(self.id[10:12])
         d = int(self.id[12:14])
-        print(GanZhi(datetime(y, m, d)).tpl())
         return {'num': (y, m, d),
                 'gregorian': (str(y), str(m), str(d)),
                 'lunar': ZhDate.from_datetime(datetime(y, m, d)).chinese(),
@@ -194,8 +193,12 @@ def table(ID: CNID) -> str:
     info = load(ID)
     keys = ['出生地', '出生日期(公历)', '出生日期(农历)', '出生日期(天干地支)',
             '年龄', '性别', '成年', '生肖', '星座', '顺序码']
-    values = [info['birthplace'], '-'.join(info['birthdate']['gregorian']), ''.join(info['birthdate']['lunar']), ''.join(
-        info['birthdate']['ganzhi']), info['age'], info['gender'], '是' if info['adult'] else '否', info['zodiac'], info['star_sign'], info['order']]
+    try:
+        values = [info['birthplace'], '-'.join(info['birthdate']['gregorian']), ''.join(info['birthdate']['lunar']), ''.join(
+                  info['birthdate']['ganzhi']), info['age'], info['gender'], '是' if info['adult'] else '否', info['zodiac'], info['star_sign'], info['order']]
+    except:
+        values = [info['birthplace'], '-'.join(info['birthdate']['gregorian']), ''.join(info['birthdate']['lunar']), '计算失败', info['age'], info['gender'], '是' if info['adult'] else '否', info['zodiac'], info['star_sign'], info['order']]
+    
     values = [' ' + str(v) for v in values]
     keys = [k + ' ' * (max([_len(k) for k in keys]) -
                        _len(k) + 1) + '|' for k in keys]
