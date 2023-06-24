@@ -177,93 +177,112 @@ class GanZhi():
 
     def getHourGanzhi(self, num=False):
         '''Get full Tian Gan Di Zhi(天干地支) of the hour in designated date.'''
-        startDT = datetime(year=1901, month=1, day=1, hour=1)
-        startGanzhi = 1
+        try:
+            startDT = datetime(year=1901, month=1, day=1, hour=1)
+            startGanzhi = 1
 
-        delta = self.dt - startDT
-        if delta.seconds < 0:
+            delta = self.dt - startDT
+            if delta.seconds < 0:
+                return ""
+
+            hours = delta.days*24 + delta.seconds/3600
+            ganNum = int((startGanzhi + hours/2) % 10)
+            if num:
+                return (ganNum+1, self.getHourZhi(self.dt.hour, num=True))
+            return ''.join([TIAN_GAN[ganNum], self.getHourZhi(), '时'])
+        except:
             return ""
-
-        hours = delta.days*24 + delta.seconds/3600
-        ganNum = int((startGanzhi + hours/2) % 10)
-        if num:
-            return (ganNum+1, self.getHourZhi(self.dt.hour, num=True))
-        return ''.join([TIAN_GAN[ganNum], self.getHourZhi(), '时'])
 
     def getYearGanzhi(self, num=False):
         '''Get full Tian Gan Di Zhi(天干地支) of the year in designated date.'''
-        if self.dt.year < 1900:
+        try:
+            if self.dt.year < 1900:
+                return ""
+            springDt = self.__getSolar(x=3)
+            y = self.dt.year
+            if self.dt < springDt:
+                y -= 1
+            ganNum = (y-4) % 10
+            zhiNum = (y-4) % 12
+            if num:
+                return (ganNum+1, zhiNum+1)
+            return ''.join([TIAN_GAN[ganNum], DI_ZHI[zhiNum], '年'])
+        except:
             return ""
-        springDt = self.__getSolar(x=3)
-        y = self.dt.year
-        if self.dt < springDt:
-            y -= 1
-        ganNum = (y-4) % 10
-        zhiNum = (y-4) % 12
-        if num:
-            return (ganNum+1, zhiNum+1)
-        return ''.join([TIAN_GAN[ganNum], DI_ZHI[zhiNum], '年'])
 
     def getMonthGanzhi(self, num=False):
         '''Get full Tian Gan Di Zhi(天干地支) of the month in designated date.'''
-        if self.dt.year < 1900:
+        try:
+            if self.dt.year < 1900:
+                return ""
+            jieqiDtList = self.__getSolarTerms_byYear(jie_only=True)
+            startzhi = 1
+            zhiNum = 0
+            for jieqiDT, index in zip(jieqiDtList, range(12)):
+                if self.dt >= jieqiDT:
+                    zhiNum = startzhi + index
+            ganList = {2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6,
+                    8: 7, 9: 8, 10: 9, 11: 10, 0: 11, 1: 12}
+            yg = self.getYearGanzhi(num=True)[0]
+            ganNum = (yg*2 + ganList[zhiNum]) % 10
+            if ganNum == 0:
+                ganNum = 10
+            ganNum -= 1
+            if num:
+                return (ganNum+1, zhiNum+1)
+            return ''.join([TIAN_GAN[ganNum], DI_ZHI[zhiNum], '月'])
+        except:
             return ""
-        jieqiDtList = self.__getSolarTerms_byYear(jie_only=True)
-        startzhi = 1
-        zhiNum = 0
-        for jieqiDT, index in zip(jieqiDtList, range(12)):
-            if self.dt >= jieqiDT:
-                zhiNum = startzhi + index
-        ganList = {2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6,
-                   8: 7, 9: 8, 10: 9, 11: 10, 0: 11, 1: 12}
-        yg = self.getYearGanzhi(num=True)[0]
-        ganNum = (yg*2 + ganList[zhiNum]) % 10
-        if ganNum == 0:
-            ganNum = 10
-        ganNum -= 1
-        if num:
-            return (ganNum+1, zhiNum+1)
-        return ''.join([TIAN_GAN[ganNum], DI_ZHI[zhiNum], '月'])
 
     def getDayGanzhi(self, num=False):
         '''Get full Tian Gan Di Zhi(天干地支) of the day in designated date.'''
-        dt = self.dt.date()
-        startdate = date(1901, 1, 1)
-        startganzhi = 16
-        delta = dt - startdate
-        if delta.days + delta.seconds < 0:
+        try:
+            dt = self.dt.date()
+            startdate = date(1901, 1, 1)
+            startganzhi = 16
+            delta = dt - startdate
+            if delta.days + delta.seconds < 0:
+                return ""
+            res = (startganzhi+delta.days) % 60
+            if res == 0:
+                res = 60
+            ganNum = (res-1) % 10
+            zhiNum = (res-1) % 12
+            if num:
+                return (ganNum+1, zhiNum+1)
+            return ''.join([TIAN_GAN[ganNum], DI_ZHI[zhiNum], '日'])
+        except:
             return ""
-        res = (startganzhi+delta.days) % 60
-        if res == 0:
-            res = 60
-        ganNum = (res-1) % 10
-        zhiNum = (res-1) % 12
-        if num:
-            return (ganNum+1, zhiNum+1)
-        return ''.join([TIAN_GAN[ganNum], DI_ZHI[zhiNum], '日'])
 
     def __str__(self, without_hour: bool = True):
         year = self.getYearGanzhi()
         month = self.getMonthGanzhi()
         day = self.getDayGanzhi()
-        if not without_hour:
-            hour = self.getHourGanzhi()
-            return str((year, month, day, hour))
+        if "" in (year, month, day):
+            return "计算失败"
         else:
-            return str((year, month, day))
+            if not without_hour:
+                hour = self.getHourGanzhi()
+                return str((year, month, day, hour))
+            else:
+                return str((year, month, day))
 
     def __repr__(self, without_hour: bool = True) -> str:
         return self.__str__(without_hour)
 
     def tpl(self, without_hour: bool = True) -> tuple:
+        '''Return data as tuple.'''
         year = self.getYearGanzhi()
         month = self.getMonthGanzhi()
         day = self.getDayGanzhi()
-        if not without_hour:
-            hour = self.getHourGanzhi()
-            return (year, month, day, hour)
+        if "" in (year, month, day):
+            return ('计算失败')
         else:
-            return (year, month, day)
+            if not without_hour:
+                hour = self.getHourGanzhi()
+                return (year, month, day, hour)
+            else:
+                return (year, month, day)
 
 
 class ZhDate():
